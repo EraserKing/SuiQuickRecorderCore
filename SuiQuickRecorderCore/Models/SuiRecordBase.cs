@@ -41,7 +41,13 @@ namespace SuiQuickRecorderCore.Models
 
         protected SuiRecordBase(string date, string price, string memo)
         {
-            Time = $"{DateTime.Parse(DateTime.Now.Year + "-" + date.Substring(0, 2) + "-" + date.Substring(2, 2)).ToString("yyyy-MM-dd")} 10:00";
+            DateTime parsedDate = DateTime.Parse(DateTime.Now.Year + "-" + date.Substring(0, 2) + "-" + date.Substring(2, 2));
+            if ((parsedDate - DateTime.Now).Days > 30) // If the record is too new (newer than today + 30 days), the record should go to the last year
+            {
+                parsedDate = parsedDate.AddYears(-1);
+            }
+
+            Time = $"{parsedDate.ToString("yyyy-MM-dd")} 10:00";
             Price = price;
             Memo = memo;
         }
