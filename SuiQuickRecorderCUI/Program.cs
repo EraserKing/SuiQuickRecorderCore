@@ -16,6 +16,11 @@ namespace SuiQuickRecorderCUI
                 StoresFile = "dataStores.csv",
                 CookiesFile = "cookies.txt"
             });
+            if(!controller.IsCredentialValid())
+            {
+                Console.WriteLine("Invalid credential, please re-enter cookies");
+                return;
+            }
             controller.LoadRecords("records.csv");
             Console.Write(controller.SendLoadedRecords());
         }

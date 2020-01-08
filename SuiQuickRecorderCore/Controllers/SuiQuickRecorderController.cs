@@ -84,6 +84,12 @@ namespace SuiQuickRecorderCore.Controllers
             return sb.ToString();
         }
 
+        public bool IsCredentialValid()
+        {
+            var result = Client.GetAsync($"{Options.ApiBaseUrl}/report_index.do").Result;
+            return result.StatusCode != HttpStatusCode.Found; // Redirect to log in page or not?
+        }
+
         private Task<HttpResponseMessage> SendRecord(ISuiRecord record)
         {
             return Client.PostAsync($"{Options.ApiBaseUrl}/{record.GetNetworkRequestEndpoint()}", new FormUrlEncodedContent(record.ToNetworkRequestBody()));
