@@ -67,7 +67,17 @@ namespace SuiQuickRecorderCore.Controllers
             CsvReader csvReader = new CsvReader(reader);
 
             // Force immediately read - otherwise a delayed read would happen on a closed stream
-            Records = csvReader.GetRecords<SuiRecordOrigin>().Select(x => SuiRecordFactory.Create(x, Accounts, CategoriesIn, CategoriesOut, Stores)).ToArray();
+            Records = csvReader.GetRecords<SuiRecordOrigin>().Select((x, l) =>
+            {
+                try
+                {
+                    return SuiRecordFactory.Create(x, Accounts, CategoriesIn, CategoriesOut, Stores);
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    throw new ArgumentOutOfRangeException($"ERROR HAPPENING (MAYBE) ON LINE {l + 1}", ex);
+                }
+            }).ToArray();
 
             reader.Close();
         }
