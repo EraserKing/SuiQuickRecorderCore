@@ -20,7 +20,7 @@ namespace SuiQuickRecorderCore.Models
                     return new SuiRecordTransfer(origin, accounts);
 
                 default:
-                    throw new ArgumentOutOfRangeException("Cannot detect record type");
+                    throw new ArgumentOutOfRangeException($"Cannot detect record type by category {origin.Category}, or account {origin.Account} & {origin.Account2}");
             }
         }
     }

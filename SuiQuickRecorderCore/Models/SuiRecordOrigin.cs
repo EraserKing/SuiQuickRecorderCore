@@ -34,7 +34,7 @@ namespace SuiQuickRecorderCore.Models
                 }
             }
 
-            throw new ArgumentException("Unable to detect record type");
+            throw new ArgumentOutOfRangeException($"Cannot detect record type by category {Category}, or account {Account} & {Account2}");
         }
     }
 }
