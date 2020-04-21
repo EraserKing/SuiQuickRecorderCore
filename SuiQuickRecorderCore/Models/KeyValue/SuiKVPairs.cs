@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
-namespace SuiQuickRecorderCore.Models
+namespace SuiQuickRecorderCore.Models.KeyValue
 {
     public class SuiKVPairs
     {
@@ -44,6 +43,8 @@ namespace SuiQuickRecorderCore.Models
         {
             get => kvMap[name];
         }
+
+        public string GetOfficialName(string name) => kvMap.First(x => x.Value == this[name]).Key;
 
         public bool Contains(string name) => kvMap.ContainsKey(name);
     }

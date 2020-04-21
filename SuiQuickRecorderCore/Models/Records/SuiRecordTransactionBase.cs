@@ -1,30 +1,10 @@
-﻿using System;
+﻿using SuiQuickRecorderCore.Models.Interfaces;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace SuiQuickRecorderCore.Models
+namespace SuiQuickRecorderCore.Models.Records
 {
-    public interface ISuiRecord
-    {
-        string Id { get; set; }
-        string Store { get; set; }
-        string Time { get; set; }
-        string Project { get; set; }
-        string Member { get; set; }
-        string Memo { get; set; }
-        string Url { get; set; }
-        string OutAccount { get; set; }
-        string InAccount { get; set; }
-        string DebtAccount { get; set; }
-        string Account { get; set; }
-        string Price { get; set; }
-
-        List<KeyValuePair<string, string>> ToNetworkRequestBody();
-
-        string GetNetworkRequestEndpoint();
-    }
-
-    public abstract class SuiRecordBase : ISuiRecord
+    public abstract class SuiRecordTransactionBase : ISuiRecord
     {
         public string Id { get; set; } = "0";
         public string Store { get; set; } = "0";
@@ -39,7 +19,9 @@ namespace SuiQuickRecorderCore.Models
         public string Account { get; set; } = "0";
         public string Price { get; set; } = "";
 
-        protected SuiRecordBase(string date, string price, string memo)
+        public SuiRecordType RecordType { get; set; }
+
+        protected SuiRecordTransactionBase(string date, string price, string memo, SuiRecordType recordType)
         {
             DateTime parsedDate = DateTime.Parse(DateTime.Now.Year + "-" + date.Substring(0, 2) + "-" + date.Substring(2, 2));
             if ((parsedDate - DateTime.Now).Days > 30) // If the record is too new (newer than today + 30 days), the record should go to the last year
@@ -47,9 +29,11 @@ namespace SuiQuickRecorderCore.Models
                 parsedDate = parsedDate.AddYears(-1);
             }
 
-            Time = $"{parsedDate.ToString("yyyy-MM-dd")} 10:00";
+            Time = $"{parsedDate:yyyy-MM-dd} 10:00";
             Price = price;
             Memo = memo;
+
+            RecordType = recordType;
         }
 
         public virtual List<KeyValuePair<string, string>> ToNetworkRequestBody()
@@ -71,6 +55,15 @@ namespace SuiQuickRecorderCore.Models
             return record;
         }
 
-        public abstract string GetNetworkRequestEndpoint();
+        public virtual string GetNetworkRequestEndpoint() => throw new Exception("NO ENDPOINT DEFINED");
+
+        public virtual IEnumerable<SuiRecordNetworkRequest> CreateNetworkRequests()
+        {
+            return new List<SuiRecordNetworkRequest>() {
+            new SuiRecordNetworkRequest(
+                GetNetworkRequestEndpoint(),
+                ToNetworkRequestBody()
+                )};
+        }
     }
 }

@@ -1,5 +1,9 @@
 ﻿using CsvHelper;
 using SuiQuickRecorderCore.Models;
+using SuiQuickRecorderCore.Models.Interfaces;
+using SuiQuickRecorderCore.Models.KeyValue;
+using SuiQuickRecorderCore.Models.Origin;
+using SuiQuickRecorderCore.Models.Records;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,13 +19,9 @@ namespace SuiQuickRecorderCore.Controllers
     {
         private HttpClient Client { get; set; }
         private SuiQuickRecorderControllerOptions Options { get; set; }
+        public SuiRecordReference Reference { get; set; }
 
-        public SuiKVPairs Accounts { get; private set; }
-        public SuiKVPairs CategoriesIn { get; private set; }
-        public SuiKVPairs CategoriesOut { get; private set; }
-        public SuiKVPairs Stores { get; private set; }
-
-        private IEnumerable<ISuiRecord> Records { get; set; }
+        private List<ISuiRecord> Records { get; set; }
 
         public SuiQuickRecorderController(SuiQuickRecorderControllerOptions options)
         {
@@ -40,10 +40,11 @@ namespace SuiQuickRecorderCore.Controllers
                 clientHandler.Proxy = new WebProxy(Options.ProxyHost, Options.ProxyPort.Value);
             }
 
+            clientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
             Client = new HttpClient(clientHandler);
 
             Client.DefaultRequestHeaders.Add("accept", "*/*");
-            Client.DefaultRequestHeaders.Add("accept-encoding", "gzip, deflate, br");
             Client.DefaultRequestHeaders.Add("accept-language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
             Client.DefaultRequestHeaders.Add("cache-control", "no-cache");
             Client.DefaultRequestHeaders.Add("dnt", "1");
@@ -55,10 +56,12 @@ namespace SuiQuickRecorderCore.Controllers
             Client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
             Client.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
 
-            Accounts = new SuiKVPairs(Options.AccountsFile);
-            CategoriesIn = new SuiKVPairs(Options.CategoriesInFile);
-            CategoriesOut = new SuiKVPairs(Options.CategoriesOutFile);
-            Stores = new SuiKVPairs(Options.StoresFile);
+            Reference = new SuiRecordReference(
+                new SuiKVPairs(Options.AccountsFile),
+                new SuiKVPairs(Options.CategoriesInFile),
+                new SuiKVPairs(Options.CategoriesOutFile),
+                new SuiKVPairs(Options.StoresFile),
+                new SuiKVPairs(Options.LoanersFile));
         }
 
         public void LoadRecords(string recordFile)
@@ -71,20 +74,25 @@ namespace SuiQuickRecorderCore.Controllers
             {
                 try
                 {
-                    return SuiRecordFactory.Create(x, Accounts, CategoriesIn, CategoriesOut, Stores);
+                    return SuiRecordFactory.Create(x, Reference);
                 }
                 catch (ArgumentOutOfRangeException ex)
                 {
                     throw new ArgumentOutOfRangeException($"ERROR HAPPENING (MAYBE) ON LINE {l + 1}", ex);
                 }
-            }).ToArray();
+            }).ToList();
+
+            // Remove loan records, combine and re-add
+            var loanRecords = SuiRecordLoan.AutoCombine(Records.Where(x => x.RecordType == SuiRecordType.Loan).Cast<SuiRecordLoan>()).ToArray();
+            Records.RemoveAll(x => x.RecordType == SuiRecordType.Loan);
+            Records.AddRange(loanRecords);
 
             reader.Close();
         }
 
         public string SendLoadedRecords()
         {
-            var tasks = Records.Select(x => SendRecord(x)).ToArray();
+            var tasks = Records.SelectMany(x => SendRecord(x)).ToArray();
             Task.WaitAll(tasks);
 
             StringBuilder sb = new StringBuilder();
@@ -100,9 +108,14 @@ namespace SuiQuickRecorderCore.Controllers
             return result.StatusCode != HttpStatusCode.Found; // Redirect to log in page or not?
         }
 
-        private Task<HttpResponseMessage> SendRecord(ISuiRecord record)
+        private Task<HttpResponseMessage>[] SendRecord(ISuiRecord record)
         {
-            return Client.PostAsync($"{Options.ApiBaseUrl}/{record.GetNetworkRequestEndpoint()}", new FormUrlEncodedContent(record.ToNetworkRequestBody()));
+            return record.CreateNetworkRequests().Select(x =>
+            {
+                var message = Client.PostAsync($"{Options.ApiBaseUrl}/{x.Endpoint}", new FormUrlEncodedContent(x.Content));
+                x.ResponseMessage = message;
+                return message;
+            }).ToArray();
         }
     }
 }
