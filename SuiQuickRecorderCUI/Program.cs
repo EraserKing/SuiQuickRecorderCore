@@ -14,6 +14,7 @@ namespace SuiQuickRecorderCUI
                 CategoriesInFile = "dataCategoriesIn.csv",
                 CategoriesOutFile = "dataCategoriesOut.csv",
                 StoresFile = "dataStores.csv",
+                LoanersFile = "loaners.csv",
                 CookiesFile = "cookies.txt"
             });
             if(!controller.IsCredentialValid())

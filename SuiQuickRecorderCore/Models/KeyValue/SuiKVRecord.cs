@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SuiQuickRecorderCore.Models
+﻿namespace SuiQuickRecorderCore.Models.KeyValue
 {
     public class SuiKVRecord
     {

@@ -8,6 +8,7 @@ namespace SuiQuickRecorderCore.Models
     {
         Out,
         In,
-        Transfer
+        Transfer,
+        Loan
     }
 }
