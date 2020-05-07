@@ -66,6 +66,10 @@ namespace SuiQuickRecorderCore.Models.Records
             }
 
             Price2 = price;
+            if (!memo.Contains(":"))
+            {
+                throw new ArgumentOutOfRangeException("Loan record tag is not found");
+            }
             Tag = memo.Substring(0, memo.IndexOf(':'));
         }
 
