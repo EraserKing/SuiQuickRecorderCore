@@ -110,12 +110,12 @@ namespace SuiQuickRecorderCore.Models.Records
 
         public new List<KeyValuePair<string, string>> ToNetworkRequestBody()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This method should not be directly called for LOAN type");
         }
 
         public override string GetNetworkRequestEndpoint()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This method should not be directly called for LOAN type");
         }
 
         private SuiRecordNetworkRequest CreateTransferRequest(string time, string project, string member, string memo, string url, string outAccount, string inAccount, string price)
