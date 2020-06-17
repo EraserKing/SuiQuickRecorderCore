@@ -66,7 +66,7 @@ namespace SuiQuickRecorderCore.Controllers
 
         public void LoadRecords(string recordFile)
         {
-            TextReader reader = new StreamReader(recordFile);
+            TextReader reader = new StreamReader(new FileStream("records.csv", FileMode.Open, FileAccess.Read));
             CsvReader csvReader = new CsvReader(reader);
 
             // Force immediately read - otherwise a delayed read would happen on a closed stream
@@ -90,32 +90,58 @@ namespace SuiQuickRecorderCore.Controllers
             reader.Close();
         }
 
-        public string SendLoadedRecords()
+        public IEnumerable<string> SendLoadedRecords()
         {
-            var tasks = Records.SelectMany(x => SendRecord(x)).ToArray();
-            Task.WaitAll(tasks);
+            int successRecords = 0;
+            int totalRecords = 0;
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"{tasks.Count(x => x.Result.IsSuccessStatusCode)} / {tasks.Length} task(s) submitted");
-            sb.Append(string.Join(Environment.NewLine, tasks.Select(x => x.Result.Content.ReadAsStringAsync().Result)));
+            int successRequests = 0;
+            int totalRequests = 0;
 
-            return sb.ToString();
+            foreach (var record in Records)
+            {
+                totalRecords++;
+                bool recordSuccess = true;
+
+                foreach (var networkRequest in record.CreateNetworkRequests())
+                {
+                    totalRequests++;
+                    int retryCount = 0;
+
+                    do
+                    {
+                        if (retryCount > 0)
+                        {
+                            yield return $"RETRY ATTEMPT #{retryCount}";
+                        }
+                        networkRequest.SendRequest(Client, Options.ApiBaseUrl);
+                        yield return networkRequest.ResponseMessage.Result.Content.ReadAsStringAsync().Result;
+                    }
+                    while (!networkRequest.IsSuccess && retryCount++ < 10);
+                    if (retryCount >= 10)
+                    {
+                        yield return "ALL RETRY ATTEMPT FAILED";
+                        recordSuccess = false;
+                    }
+
+                    if (networkRequest.IsSuccess)
+                    {
+                        successRequests++;
+                    }
+                }
+
+                if (recordSuccess)
+                {
+                    successRecords++;
+                }
+            }
+            yield return $"Records success {successRecords} / total {totalRecords}, requests success {successRequests} / total {totalRequests}";
         }
 
         public bool IsCredentialValid()
         {
             var result = Client.GetAsync($"{Options.ApiBaseUrl}/report_index.do").Result;
             return result.StatusCode != HttpStatusCode.Found; // Redirect to log in page or not?
-        }
-
-        private Task<HttpResponseMessage>[] SendRecord(ISuiRecord record)
-        {
-            return record.CreateNetworkRequests().Select(x =>
-            {
-                var message = Client.PostAsync($"{Options.ApiBaseUrl}/{x.Endpoint}", new FormUrlEncodedContent(x.Content));
-                x.ResponseMessage = message;
-                return message;
-            }).ToArray();
         }
     }
 }
