@@ -23,7 +23,11 @@ namespace SuiQuickRecorderCUI
                 return;
             }
             controller.LoadRecords("records.csv");
-            Console.Write(controller.SendLoadedRecords());
+
+            foreach(string result in controller.SendLoadedRecords())
+            {
+                Console.WriteLine(result);
+            }
         }
     }
 }
