@@ -64,9 +64,9 @@ namespace SuiQuickRecorderCore.Controllers
                 new SuiKVPairs(Options.LoanersFile));
         }
 
-        public void LoadRecords(string recordFile)
+        public void LoadRecords(string recordFile = "records.csv")
         {
-            TextReader reader = new StreamReader(new FileStream("records.csv", FileMode.Open, FileAccess.Read));
+            TextReader reader = new StreamReader(new FileStream(recordFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             CsvReader csvReader = new CsvReader(reader);
 
             // Force immediately read - otherwise a delayed read would happen on a closed stream
