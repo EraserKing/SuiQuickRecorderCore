@@ -12,7 +12,7 @@ namespace SuiQuickRecorderCore.Models.KeyValue
 
         public SuiKVPairs(string path)
         {
-            TextReader textReader = new StreamReader(path);
+            TextReader textReader = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             CsvReader csvReader = new CsvReader(textReader);
 
             foreach (var pair in csvReader.GetRecords<SuiKVRecord>())
