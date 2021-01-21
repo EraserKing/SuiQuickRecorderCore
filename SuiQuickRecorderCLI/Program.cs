@@ -2,7 +2,7 @@
 using SuiQuickRecorderCore.Controllers;
 using System;
 
-namespace SuiQuickRecorderCUI
+namespace SuiQuickRecorderCLI
 {
     class Program
     {
