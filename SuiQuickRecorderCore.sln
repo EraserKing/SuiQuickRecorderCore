@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuiQuickRecorderCore", "SuiQuickRecorderCore\SuiQuickRecorderCore.csproj", "{27A9C70F-5037-4F32-853A-02E168488C64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiQuickRecorderCUI", "SuiQuickRecorderCUI\SuiQuickRecorderCUI.csproj", "{58E0699C-F47C-4AED-85E8-B5A1BFEA6D28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuiQuickRecorder-CLI", "SuiQuickRecorderCLI\SuiQuickRecorder-CLI.csproj", "{CA50D1CA-BC75-41E0-BCA9-E1C49112BE69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{27A9C70F-5037-4F32-853A-02E168488C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27A9C70F-5037-4F32-853A-02E168488C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27A9C70F-5037-4F32-853A-02E168488C64}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58E0699C-F47C-4AED-85E8-B5A1BFEA6D28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58E0699C-F47C-4AED-85E8-B5A1BFEA6D28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58E0699C-F47C-4AED-85E8-B5A1BFEA6D28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58E0699C-F47C-4AED-85E8-B5A1BFEA6D28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA50D1CA-BC75-41E0-BCA9-E1C49112BE69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA50D1CA-BC75-41E0-BCA9-E1C49112BE69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA50D1CA-BC75-41E0-BCA9-E1C49112BE69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA50D1CA-BC75-41E0-BCA9-E1C49112BE69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
