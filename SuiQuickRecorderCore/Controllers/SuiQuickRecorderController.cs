@@ -10,8 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuiQuickRecorderCore.Controllers
 {
@@ -40,7 +38,7 @@ namespace SuiQuickRecorderCore.Controllers
                 clientHandler.Proxy = new WebProxy(Options.ProxyHost, Options.ProxyPort.Value);
             }
 
-            clientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            clientHandler.AutomaticDecompression = DecompressionMethods.All;
 
             Client = new HttpClient(clientHandler);
 
@@ -69,6 +67,8 @@ namespace SuiQuickRecorderCore.Controllers
             TextReader reader = new StreamReader(new FileStream(recordFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             CsvReader csvReader = new CsvReader(reader);
 
+            List<ArgumentOutOfRangeException> createExceptions = new List<ArgumentOutOfRangeException>();
+
             // Force immediately read - otherwise a delayed read would happen on a closed stream
             Records = csvReader.GetRecords<SuiRecordOrigin>().Select((x, l) =>
             {
@@ -78,9 +78,15 @@ namespace SuiQuickRecorderCore.Controllers
                 }
                 catch (ArgumentOutOfRangeException ex)
                 {
-                    throw new ArgumentOutOfRangeException($"ERROR HAPPENING (MAYBE) ON LINE {l + 1}", ex);
+                    createExceptions.Add(new ArgumentOutOfRangeException($"An error occurred, *maybe* on line {l + 1}", ex));
+                    return null;
                 }
             }).ToList();
+
+            if (createExceptions.Count > 0)
+            {
+                throw new AggregateException($"Some error(s) occurred when reading records: {Environment.NewLine}{string.Join(Environment.NewLine, createExceptions.Select(x => $"{x.Message}: {x.InnerException.Message}"))}", createExceptions);
+            }
 
             // Remove loan records, combine and re-add
             var loanRecords = SuiRecordLoan.AutoCombine(Records.Where(x => x.RecordType == SuiRecordType.Loan).Cast<SuiRecordLoan>()).ToArray();
