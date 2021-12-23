@@ -18,11 +18,14 @@ namespace SuiQuickRecorderCore.Models.Records
         public string DebtAccount { get; set; } = "";
         public string Account { get; set; } = "0";
         public string Price { get; set; } = "";
+        public string OriginalDate { get; set; }
 
         public SuiRecordType RecordType { get; set; }
 
         protected SuiRecordTransactionBase(string date, string price, string memo, SuiRecordType recordType)
         {
+            OriginalDate = date;
+
             DateTime parsedDate = DateTime.Parse(DateTime.Now.Year + "-" + date.Substring(0, 2) + "-" + date.Substring(2, 2));
             if ((parsedDate - DateTime.Now).Days > 30) // If the record is too new (newer than today + 30 days), the record should go to the last year
             {
