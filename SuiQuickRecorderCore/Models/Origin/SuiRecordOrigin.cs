@@ -16,7 +16,14 @@ namespace SuiQuickRecorderCore.Models.Origin
         {
             if (reference.Accounts.Contains(Account) && reference.Accounts.Contains(Account2))
             {
-                return SuiRecordType.Transfer;
+                if (string.IsNullOrEmpty(Category))
+                {
+                    return SuiRecordType.Transfer;
+                }
+                else if (reference.CategoriesIn.Contains(Category) || reference.CategoriesOut.Contains(Category))
+                {
+                    return SuiRecordType.Combined;
+                }
             }
 
             if (reference.Accounts.Contains(Account) && string.IsNullOrEmpty(Account2))

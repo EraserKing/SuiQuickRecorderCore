@@ -160,7 +160,7 @@ namespace SuiQuickRecorderCore.Controllers
                     record.Memo = originalMemo;
                 }
 
-                record.Price = record.Price.Split('+').Select(x => decimal.Parse(x)).Sum().ToString();
+                record.Price = string.Join(",", record.Price.Split(",").Select(x => x.Split('+').Select(x => decimal.Parse(x)).Sum().ToString()));
             }
 
             // Remove loan records, combine and re-add

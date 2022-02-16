@@ -9,6 +9,7 @@ namespace SuiQuickRecorderCore.Models
         Out,
         In,
         Transfer,
-        Loan
+        Loan,
+        Combined
     }
 }
