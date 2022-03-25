@@ -21,6 +21,7 @@ namespace SuiQuickRecorderCore.Models.Records
             {
                 Store = reference.Stores[store];
             }
+            UpdateMemo();
         }
 
         public override List<KeyValuePair<string, string>> ToNetworkRequestBody()

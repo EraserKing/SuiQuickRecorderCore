@@ -22,7 +22,6 @@ namespace SuiQuickRecorderCore.Controllers
 
         private List<ISuiRecord> Records { get; set; }
 
-        public static readonly Regex MemoVariable = new Regex(@"\{(\w+)\}", RegexOptions.Compiled);
 
         public SuiQuickRecorderController(SuiQuickRecorderControllerOptions options)
         {
@@ -73,7 +72,7 @@ namespace SuiQuickRecorderCore.Controllers
             List<ArgumentOutOfRangeException> createExceptions = new List<ArgumentOutOfRangeException>();
 
             // Force immediately read - otherwise a delayed read would happen on a closed stream
-            Records = csvReader.GetRecords<SuiRecordOrigin>().Select((x, l) =>
+            Records = csvReader.GetRecords<SuiRecordOrigin>().SelectMany((x, l) =>
             {
                 try
                 {
@@ -89,78 +88,6 @@ namespace SuiQuickRecorderCore.Controllers
             if (createExceptions.Count > 0)
             {
                 throw new AggregateException($"Some error(s) occurred when reading records: {Environment.NewLine}{string.Join(Environment.NewLine, createExceptions.Select(x => $"{x.Message}: {x.InnerException.Message}"))}", createExceptions);
-            }
-
-            foreach (var record in Records)
-            {
-                var matches = MemoVariable.Matches(record.Memo);
-                if (matches.Count > 0)
-                {
-                    string originalMemo = record.Memo;
-                    foreach (Match match in matches)
-                    {
-                        string variableName = match.Groups[1].Value;
-                        switch (variableName)
-                        {
-                            case "Id":
-                                originalMemo.Replace(match.Groups[0].Value, record.Id);
-                                break;
-
-                            case "Store":
-                                originalMemo.Replace(match.Groups[0].Value, record.Store);
-                                break;
-
-                            case "Time":
-                                originalMemo.Replace(match.Groups[0].Value, record.Time);
-                                break;
-
-                            case "Project":
-                                originalMemo.Replace(match.Groups[0].Value, record.Project);
-                                break;
-
-                            case "Member":
-                                originalMemo.Replace(match.Groups[0].Value, record.Member);
-                                break;
-
-                            /* Memo cannot be replaced in case of dead loop
-                            case "Memo":
-                                originalMemo.Replace(match.Groups[0].Value, record.Memo);
-                                break; */
-
-                            case "Url":
-                                originalMemo.Replace(match.Groups[0].Value, record.Url);
-                                break;
-
-                            case "OutAccount":
-                                originalMemo.Replace(match.Groups[0].Value, record.OutAccount);
-                                break;
-
-                            case "InAccount":
-                                originalMemo.Replace(match.Groups[0].Value, record.InAccount);
-                                break;
-
-                            case "DebtAccount":
-                                originalMemo.Replace(match.Groups[0].Value, record.DebtAccount);
-                                break;
-
-                            case "Account":
-                                originalMemo.Replace(match.Groups[0].Value, record.Account);
-                                break;
-
-                            case "Price":
-                                originalMemo.Replace(match.Groups[0].Value, record.Price);
-                                break;
-
-                            case "OriginalDate":
-                                originalMemo.Replace(match.Groups[0].Value, record.OriginalDate);
-                                break;
-                        }
-                    }
-
-                    record.Memo = originalMemo;
-                }
-
-                record.Price = string.Join(",", record.Price.Split(",").Select(x => x.Split('+').Select(x => decimal.Parse(x)).Sum().ToString()));
             }
 
             // Remove loan records, combine and re-add

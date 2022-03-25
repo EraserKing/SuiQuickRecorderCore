@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SuiQuickRecorderCore.Models.Origin
 {
@@ -11,6 +13,17 @@ namespace SuiQuickRecorderCore.Models.Origin
         public string Price { get; set; }
         public string Store { get; set; }
         public string Memo { get; set; }
+
+        public IEnumerable<SuiRecordOrigin> SplitByDate() => Date.Split(',').Select(x => new SuiRecordOrigin
+        {
+            Date = x,
+            Category = Category,
+            Account = Account,
+            Account2 = Account2,
+            Price = Price,
+            Store = Store,
+            Memo = Memo
+        });
 
         public SuiRecordType GetRecordType(SuiRecordReference reference)
         {

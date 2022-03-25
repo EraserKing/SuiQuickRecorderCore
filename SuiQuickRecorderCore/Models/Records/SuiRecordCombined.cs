@@ -23,14 +23,14 @@ namespace SuiQuickRecorderCore.Models.Records
 
         public SuiRecordCombined(string date, string category, string accountOut, string accountIn, string price, string store, string memo, SuiRecordReference reference, SuiRecordType recordType) : base(date, price, memo, recordType)
         {
+            _reference = reference;
+            Category = category;
             if (reference.CategoriesIn.Contains(category))
             {
-                Category = reference.CategoriesIn[category];
                 SplitRecordType = SuiRecordType.In;
             }
             else if (reference.CategoriesOut.Contains(category))
             {
-                Category = reference.CategoriesOut[category];
                 SplitRecordType = SuiRecordType.Out;
             }
             else
@@ -38,13 +38,11 @@ namespace SuiQuickRecorderCore.Models.Records
                 throw new ArgumentOutOfRangeException(nameof(category), $"Cannot distinguish category from {category}");
             }
 
-            OutAccount = reference.Accounts[accountOut];
-            InAccount = reference.Accounts[accountIn];
+            OutAccount = accountOut;
+            InAccount = accountIn;
 
-            if (!string.IsNullOrEmpty(store))
-            {
-                Store = reference.Stores[store];
-            }
+            Store = store;
+            UpdateMemo();
         }
 
         public new List<KeyValuePair<string, string>> ToNetworkRequestBody()
@@ -66,11 +64,11 @@ namespace SuiQuickRecorderCore.Models.Records
             switch (SplitRecordType)
             {
                 case SuiRecordType.In:
-                    requests.AddRange(new SuiRecordIn(OriginalDate, Category, Account, Price.Split(",")[0], Store, Memo, _reference, SplitRecordType).CreateNetworkRequests());
+                    requests.AddRange(new SuiRecordIn(OriginalDate, Category, InAccount, Price.Split(",")[0], Store, Memo, _reference, SplitRecordType).CreateNetworkRequests());
                     break;
 
                 case SuiRecordType.Out:
-                    requests.AddRange(new SuiRecordOut(OriginalDate, Category, Account, Price.Split(",")[0], Store, Memo, _reference, SplitRecordType).CreateNetworkRequests());
+                    requests.AddRange(new SuiRecordOut(OriginalDate, Category, OutAccount, Price.Split(",")[0], Store, Memo, _reference, SplitRecordType).CreateNetworkRequests());
                     break;
             }
 

@@ -71,6 +71,7 @@ namespace SuiQuickRecorderCore.Models.Records
                 throw new ArgumentOutOfRangeException("Loan record tag is not found");
             }
             Tag = memo.Substring(0, memo.IndexOf(':'));
+            UpdateMemo();
         }
 
         public static IEnumerable<SuiRecordLoan> AutoCombine(IEnumerable<SuiRecordLoan> loans)

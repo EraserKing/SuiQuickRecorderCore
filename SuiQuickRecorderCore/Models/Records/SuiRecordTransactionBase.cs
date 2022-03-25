@@ -1,6 +1,8 @@
 ﻿using SuiQuickRecorderCore.Models.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SuiQuickRecorderCore.Models.Records
 {
@@ -22,6 +24,8 @@ namespace SuiQuickRecorderCore.Models.Records
 
         public SuiRecordType RecordType { get; set; }
 
+        public static readonly Regex MemoVariable = new Regex(@"\{(\w+)\}", RegexOptions.Compiled);
+
         protected SuiRecordTransactionBase(string date, string price, string memo, SuiRecordType recordType)
         {
             OriginalDate = date;
@@ -33,10 +37,80 @@ namespace SuiQuickRecorderCore.Models.Records
             }
 
             Time = $"{parsedDate:yyyy-MM-dd} 10:00";
-            Price = price;
+            Price = string.Join(",", price.Split(",").Select(x => x.Split('+').Select(x => decimal.Parse(x)).Sum().ToString()));
             Memo = memo;
 
             RecordType = recordType;
+        }
+
+        protected void UpdateMemo()
+        {
+            var matches = MemoVariable.Matches(Memo);
+            if (matches.Count > 0)
+            {
+                string originalMemo = Memo;
+                foreach (Match match in matches)
+                {
+                    string variableName = match.Groups[1].Value;
+                    switch (variableName)
+                    {
+                        case "Id":
+                            originalMemo= originalMemo.Replace(match.Groups[0].Value, Id);
+                            break;
+
+                        case "Store":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Store);
+                            break;
+
+                        case "Time":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Time);
+                            break;
+
+                        case "Project":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Project);
+                            break;
+
+                        case "Member":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Member);
+                            break;
+
+                        /* Memo cannot be replaced in case of dead loop
+                        case "Memo":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, record.Memo);
+                            break; */
+
+                        case "Url":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Url);
+                            break;
+
+                        case "OutAccount":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, OutAccount);
+                            break;
+
+                        case "InAccount":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, InAccount);
+                            break;
+
+                        case "DebtAccount":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, DebtAccount);
+                            break;
+
+                        case "Account":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Account);
+                            break;
+
+                        case "Price":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Price);
+                            break;
+
+                        case "OriginalDate":
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, OriginalDate);
+                            break;
+                    }
+                }
+
+                Memo = originalMemo;
+            }
         }
 
         public virtual List<KeyValuePair<string, string>> ToNetworkRequestBody()
