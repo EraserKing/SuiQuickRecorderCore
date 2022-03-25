@@ -16,6 +16,7 @@ namespace SuiQuickRecorderCore.Models.Records
         {
             OutAccount = reference.Accounts[accountOut];
             InAccount = reference.Accounts[accountIn];
+            UpdateMemo();
         }
 
         public override List<KeyValuePair<string, string>> ToNetworkRequestBody()
