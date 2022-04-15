@@ -38,6 +38,11 @@ namespace SuiQuickRecorderCore.Models.Records
                 throw new ArgumentOutOfRangeException(nameof(category), $"Cannot distinguish category from {category}");
             }
 
+            if (price.Split(",").Length != 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(category), $"Cannot split record on combined type on price {price}");
+            }
+
             OutAccount = accountOut;
             InAccount = accountIn;
 
