@@ -24,7 +24,7 @@ namespace SuiQuickRecorderCore.Models.Records
 
         public SuiRecordType RecordType { get; set; }
 
-        public static readonly Regex MemoVariable = new Regex(@"\{(\w+)\}", RegexOptions.Compiled);
+        public static readonly Regex MemoVariable = new Regex(@"\{(\w+)\}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         protected SuiRecordTransactionBase(string date, string price, string memo, SuiRecordType recordType)
         {
@@ -55,7 +55,7 @@ namespace SuiQuickRecorderCore.Models.Records
                     switch (variableName)
                     {
                         case "Id":
-                            originalMemo= originalMemo.Replace(match.Groups[0].Value, Id);
+                            originalMemo = originalMemo.Replace(match.Groups[0].Value, Id);
                             break;
 
                         case "Store":
