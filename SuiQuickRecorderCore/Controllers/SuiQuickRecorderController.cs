@@ -69,25 +69,17 @@ namespace SuiQuickRecorderCore.Controllers
             TextReader reader = new StreamReader(new FileStream(recordFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             CsvReader csvReader = new CsvReader(reader);
 
-            List<ArgumentOutOfRangeException> createExceptions = new List<ArgumentOutOfRangeException>();
+            List<Exception> createExceptions = new List<Exception>();
 
             // Force immediately read - otherwise a delayed read would happen on a closed stream
             Records = csvReader.GetRecords<SuiRecordOrigin>().SelectMany((x, l) =>
             {
-                try
-                {
-                    return SuiRecordFactory.Create(x, Reference);
-                }
-                catch (ArgumentOutOfRangeException ex)
-                {
-                    createExceptions.Add(new ArgumentOutOfRangeException($"An error occurred, *maybe* on line {l + 1}", ex));
-                    return null;
-                }
+                return SuiRecordFactory.Create(x, Reference, l, createExceptions);
             }).ToList();
 
             if (createExceptions.Count > 0)
             {
-                throw new AggregateException($"Some error(s) occurred when reading records: {Environment.NewLine}{string.Join(Environment.NewLine, createExceptions.Select(x => $"{x.Message}: {x.InnerException.Message}"))}", createExceptions);
+                throw new AggregateException($"Some error(s) occurred when reading records: {Environment.NewLine}{string.Join(Environment.NewLine, createExceptions.Select(x => $"{x.Message}: {x.InnerException?.Message}"))}", createExceptions);
             }
 
             // Remove loan records, combine and re-add
