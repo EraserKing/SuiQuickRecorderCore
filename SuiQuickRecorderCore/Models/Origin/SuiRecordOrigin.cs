@@ -14,7 +14,7 @@ namespace SuiQuickRecorderCore.Models.Origin
         public string Store { get; set; }
         public string Memo { get; set; }
 
-        public IEnumerable<SuiRecordOrigin> SplitByDate() => Date.Split(',').Select(x => new SuiRecordOrigin
+        public IEnumerable<SuiRecordOrigin> SplitByDate() => Date.Split(',', ' ').Select(x => new SuiRecordOrigin
         {
             Date = x,
             Category = Category,
