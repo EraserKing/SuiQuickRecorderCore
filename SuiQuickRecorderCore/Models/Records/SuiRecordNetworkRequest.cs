@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace SuiQuickRecorderCore.Models.Records
 {
@@ -24,7 +25,10 @@ namespace SuiQuickRecorderCore.Models.Records
 
         public void SendRequest(HttpClient client, string baseUrl)
         {
-            ResponseMessage = client.PostAsync($"{baseUrl}/{Endpoint}", new FormUrlEncodedContent(Content));
+            var formStr = string.Join('&', Content.Select(kv => $"{kv.Key}={HttpUtility.UrlEncode(kv.Value)}"));
+            var formCtx = new StringContent(formStr, Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            ResponseMessage = client.PostAsync($"{baseUrl}/{Endpoint}", formCtx);
         }
     }
 }

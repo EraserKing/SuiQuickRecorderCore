@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
+using System.Text;
 
 namespace SuiQuickRecorderCore.Controllers
 {
@@ -66,7 +66,7 @@ namespace SuiQuickRecorderCore.Controllers
 
         public void LoadRecords(string recordFile = "records.csv")
         {
-            TextReader reader = new StreamReader(new FileStream(recordFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            TextReader reader = new StreamReader(new FileStream(recordFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), Encoding.UTF8);
             CsvReader csvReader = new CsvReader(reader);
 
             List<Exception> createExceptions = new List<Exception>();
