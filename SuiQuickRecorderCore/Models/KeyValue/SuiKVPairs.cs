@@ -1,7 +1,5 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SuiQuickRecorderCore.Models.KeyValue
@@ -10,24 +8,11 @@ namespace SuiQuickRecorderCore.Models.KeyValue
     {
         private Dictionary<string, string> kvMap = new Dictionary<string, string>();
 
-        public SuiKVPairs(string path)
+        public SuiKVPairs()
         {
-            TextReader textReader = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            CsvReader csvReader = new CsvReader(textReader);
-
-            foreach (var pair in csvReader.GetRecords<SuiKVRecord>())
-            {
-                AddKVPair(pair.Name, pair.Id);
-                foreach (var altValue in pair.Alts.Where(x => !string.IsNullOrEmpty(x)))
-                {
-                    AddKVPair(altValue, pair.Id);
-                }
-            }
-
-            textReader.Close();
         }
 
-        private void AddKVPair(string key, string value)
+        public void Add(string key, string value)
         {
             if (kvMap.ContainsKey(key))
             {

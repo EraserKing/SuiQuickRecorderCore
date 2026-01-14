@@ -167,7 +167,7 @@ namespace SuiQuickRecorderCore.Models.Records
                 // TRANSFER
                 var request1 = CreateTransferRequest(Time, Project, Member, $"[借出]{Loaner} {Memo}", Url, OutAccount, ARAccount, OutPrice);
                 yield return request1;
-                string outId = Regex.Match(request1.ResponseMessage.Result.Content.ReadAsStringAsync().Result, $@"outId:(\d+)").Groups[1].Value;
+                string outId = Regex.Match(request1.ResponseContent, $@"outId:(\d+)").Groups[1].Value;
 
                 // DEBT
                 var request2 = CreateLoanRequest(Opt, "jiechu", DebtId, outId, "0");
@@ -178,7 +178,7 @@ namespace SuiQuickRecorderCore.Models.Records
                     // TRANSFER
                     var request3 = CreateTransferRequest(Time, Project, Member, $"[收债]{Loaner} {Memo}", Url, ARAccount, InAccount, InPrice);
                     yield return request3;
-                    string outId2 = Regex.Match(request3.ResponseMessage.Result.Content.ReadAsStringAsync().Result, $@"outId:(\d+)").Groups[1].Value;
+                    string outId2 = Regex.Match(request3.ResponseContent, $@"outId:(\d+)").Groups[1].Value;
 
                     // DEBT
                     var request4 = CreateLoanRequest(Opt, "huanru", DebtId, outId2, outId);
@@ -191,7 +191,7 @@ namespace SuiQuickRecorderCore.Models.Records
                 // TRANSFER
                 var request1 = CreateTransferRequest(Time, Project, Member, $"[借入]{Loaner} {Memo}", Url, APAccount, InAccount, OutPrice);
                 yield return request1;
-                string outId = Regex.Match(request1.ResponseMessage.Result.Content.ReadAsStringAsync().Result, $@"outId:(\d+)").Groups[1].Value;
+                string outId = Regex.Match(request1.ResponseContent, $@"outId:(\d+)").Groups[1].Value;
 
                 // DEBT
                 var request2 = CreateLoanRequest(Opt, "jieru", DebtId, outId, "0");
@@ -202,7 +202,7 @@ namespace SuiQuickRecorderCore.Models.Records
                     // TRANSFER
                     var request3 = CreateTransferRequest(Time, Project, Member, $"[还债]{Loaner} {Memo}", Url, OutAccount, APAccount, InPrice);
                     yield return request3;
-                    string outId2 = Regex.Match(request3.ResponseMessage.Result.Content.ReadAsStringAsync().Result, $@"outId:(\d+)").Groups[1].Value;
+                    string outId2 = Regex.Match(request3.ResponseContent, $@"outId:(\d+)").Groups[1].Value;
 
                     // DEBT
                     var request4 = CreateLoanRequest(Opt, "huanchu", DebtId, outId2, outId);
