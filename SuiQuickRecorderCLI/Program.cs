@@ -80,22 +80,38 @@ namespace SuiQuickRecorderCLI
             csvReader.Configuration.MissingFieldFound = null;
             var origins = csvReader.GetRecords<SuiRecordOrigin>().ToList(); // Materialize DTOs
 
-            var result = await service.SendRecordsAsync(origins, reference);
-            
+            // Process Stage
+            var processResult = service.ProcessRecords(origins, reference);
+
             Console.WriteLine("--------------------------------------------------");
-            Console.WriteLine($"Processing Completed.");
+            Console.WriteLine("Process Result:");
+            foreach (var line in processResult.Lines)
+            {
+                if (!line.Success)
+                    foreach (var e in line.Errors)
+                        Console.WriteLine($"  [Line {line.Line}] ERROR: {e}");
+            }
+
+            if (processResult.Lines.Any(l => !l.Success))
+            {
+                Console.WriteLine("Process failed. Aborting send.");
+                return;
+            }
+
+            // Send Stage
+            var result = await service.SendRecordsAsync(origins, reference);
+
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine($"Send Completed.");
             Console.WriteLine($"Records: {result.SuccessRecords}/{result.TotalRecords}");
             Console.WriteLine($"Requests: {result.SuccessRequests}/{result.TotalRequests}");
-            
-            if (result.Warnings.Any())
-            {
-                Console.WriteLine("Warnings:");
-                foreach (var w in result.Warnings) Console.WriteLine($" - {w}");
-            }
-             if (result.Errors.Any())
+
+            if (result.Lines.Any())
             {
                 Console.WriteLine("Errors:");
-                foreach (var e in result.Errors) Console.WriteLine($" - {e}");
+                foreach (var line in result.Lines)
+                    foreach (var e in line.Errors)
+                        Console.WriteLine($"  [Line {line.Line}] {e}");
             }
         }
     }

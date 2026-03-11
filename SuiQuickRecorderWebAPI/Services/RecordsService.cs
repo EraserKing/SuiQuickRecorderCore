@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SuiQuickRecorderCore.Models;
-using SuiQuickRecorderCore.Models.Interfaces;
 using SuiQuickRecorderCore.Models.Origin;
 using SuiQuickRecorderCore.Services;
 using SuiQuickRecorderWebAPI.Models;
@@ -34,13 +32,13 @@ namespace SuiQuickRecorderWebAPI.Services
             }
         }
 
-        public async Task<List<ISuiRecord>> ProcessRecordsAsync(IEnumerable<SuiRecordOrigin> records)
+        public async Task<SuiQuickRecorderProcessResult> ProcessRecordsAsync(IEnumerable<SuiRecordOrigin> records)
         {
             await EnsureLoggedInAsync();
             return _suiQuickRecorderService.ProcessRecords(records, await _metadataService.GetReferencesAsync());
         }
 
-        public async Task<SuiQuickRecorderProcessResult> SendRecordsAsync(IEnumerable<SuiRecordOrigin> records)
+        public async Task<SuiQuickRecorderSendResult> SendRecordsAsync(IEnumerable<SuiRecordOrigin> records)
         {
             await EnsureLoggedInAsync();
             return await _suiQuickRecorderService.SendRecordsAsync(records, await _metadataService.GetReferencesAsync());
