@@ -1,16 +1,15 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SuiQuickRecorderCore.Models.KeyValue;
 using SuiQuickRecorderCore.Models.Options;
 using SuiQuickRecorderCore.Models.Origin;
 using SuiQuickRecorderCore.Services;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SuiQuickRecorderCLI
@@ -21,9 +20,12 @@ namespace SuiQuickRecorderCLI
         {
             var kvPairs = new SuiKVPairs();
             using var reader = new StreamReader(path);
-            using var csvReader = new CsvReader(reader);
-            csvReader.Configuration.HeaderValidated = null;
-            csvReader.Configuration.MissingFieldFound = null;
+            var kvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HeaderValidated = null,
+                MissingFieldFound = null,
+            };
+            using var csvReader = new CsvReader(reader, kvConfig);
 
             foreach (var pair in csvReader.GetRecords<SuiKVRecord>())
             {
@@ -75,9 +77,12 @@ namespace SuiQuickRecorderCLI
 
             // Load Records
             var recordReader = new StreamReader("records.csv");
-            var csvReader = new CsvReader(recordReader);
-            csvReader.Configuration.HeaderValidated = null;
-            csvReader.Configuration.MissingFieldFound = null;
+            var recordConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HeaderValidated = null,
+                MissingFieldFound = null,
+            };
+            var csvReader = new CsvReader(recordReader, recordConfig);
             var origins = csvReader.GetRecords<SuiRecordOrigin>().ToList(); // Materialize DTOs
 
             // Process Stage
